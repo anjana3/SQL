@@ -1,0 +1,12 @@
+Query: SELECT trans.customer_num,pd_info.accounting_category,
+ROUND(SUM(CASE WHEN order_date BETWEEN '2018-03-01' AND '2018-03-31' THEN trans.revenue ELSE 0 END),2) March,
+ROUND(SUM(CASE WHEN order_date BETWEEN '2018-04-01' AND '2018-04-30' THEN trans.revenue ELSE 0 END),2) April,
+ROUND(SUM(CASE WHEN order_date BETWEEN '2018-05-01' AND '2018-05-31' THEN trans.revenue ELSE 0 END),2) May,
+ROUND(SUM(CASE WHEN order_date BETWEEN '2018-06-01' AND '2018-06-30' THEN trans.revenue ELSE 0 END),2) June,
+ROUND(SUM(CASE WHEN order_date BETWEEN '2018-07-01' AND '2018-07-31' THEN trans.revenue ELSE 0 END),2) July,
+ROUND(SUM(CASE WHEN order_date BETWEEN '2018-08-01' AND '2018-08-31' THEN trans.revenue ELSE 0 END),2) August
+FROM sandbox-211511.LIDD_Dataset.viewTransactions AS trans
+LEFT JOIN sandbox-211511.LIDD_Dataset.Product_Info AS pd_info ON trans.item_num=pd_info.item_num
+group by trans.customer_num,pd_info.accounting_category
+
+
