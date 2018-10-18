@@ -1,0 +1,119 @@
+#standardSQL
+
+WITH category_summary AS
+(
+  SELECT 
+    pinfo.accounting_category AS category,
+    COUNT(1) AS product_count
+  FROM `sandbox-211511.LIDD_Dataset.Product_Info` AS pinfo
+  GROUP BY pinfo.accounting_category
+),
+
+tran_summary AS
+(
+  SELECT
+    trans.category,
+    SUM(qty) sold_qty,
+    SUM(trans.sellPrice * trans.qty) AS revenue,
+    SUM(trans.costPrice * trans.qty) AS cost,
+    SUM(trans.sellPrice * trans.qty) - SUM(trans.costPrice * trans.qty) AS profit,
+    (SUM(trans.sellPrice * trans.qty) - SUM(trans.costPrice * trans.qty)) * 100 / SUM(trans.sellPrice * trans.qty) AS profit_percent_on_revenue,
+    (SUM(trans.sellPrice * trans.qty) - SUM(trans.costPrice * trans.qty)) * 100 / SUM(trans.costPrice * trans.qty) AS profit_percent_on_cost
+  FROM `sandbox-211511.LIDD_Dataset.transactions6Mil` AS trans
+  GROUP BY trans.category
+)
+
+
+SELECT
+  category_summary.category as category,
+  category_summary.product_count as product_count,
+  IFNULL(tran_summary.sold_qty, 0) AS sold_qty,
+  ROUND(CAST(IFNULL(tran_summary.revenue, 0) AS NUMERIC), 2) AS revenue,
+  ROUND(CAST(IFNULL(tran_summary.cost, 0) AS NUMERIC), 2) AS cost,
+  ROUND(CAST(IFNULL(tran_summary.profit, 0) AS NUMERIC), 2) AS profit,
+  ROUND(CAST(IFNULL(tran_summary.profit_percent_on_revenue, 0) AS NUMERIC), 2) AS profit_percent_on_revenue,
+  ROUND(CAST(IFNULL(tran_summary.profit_percent_on_cost, 0) AS NUMERIC), 2) AS profit_percent_on_cost
+FROM category_summary
+  LEFT JOIN tran_summary ON category_summary.category = tran_summary.category
+ORDER BY category_summary.category
+
+
+
+********************************************
+
+2)with left join
+
+SELECT
+  category_summary.category as category,
+  category_summary.product_count as product_count,
+  IFNULL(tran_summary.sold_qty, 0) AS sold_qty,
+  ROUND(CAST(IFNULL(tran_summary.revenue, 0) AS NUMERIC), 2) AS revenue,
+  ROUND(CAST(IFNULL(tran_summary.cost, 0) AS NUMERIC), 2) AS cost,
+  ROUND(CAST(IFNULL(tran_summary.profit, 0) AS NUMERIC), 2) AS profit,
+  ROUND(CAST(IFNULL(tran_summary.profit_percent_on_revenue, 0) AS NUMERIC), 2) AS profit_percent_on_revenue,
+  ROUND(CAST(IFNULL(tran_summary.profit_percent_on_cost, 0) AS NUMERIC), 2) AS profit_percent_on_cost
+FROM 
+    (
+      SELECT 
+        pinfo.accounting_category AS category,
+        COUNT(1) AS product_count
+      FROM `sandbox-211511.LIDD_Dataset.Product_Info` AS pinfo
+      GROUP BY pinfo.accounting_category
+    ) AS category_summary
+  LEFT JOIN 
+  ( 
+      SELECT
+        trans.category,
+        SUM(qty) sold_qty,
+        SUM(trans.sellPrice * trans.qty) AS revenue,
+        SUM(trans.costPrice * trans.qty) AS cost,
+        SUM(trans.sellPrice * trans.qty) - SUM(trans.costPrice * trans.qty) AS profit,
+        (SUM(trans.sellPrice * trans.qty) - SUM(trans.costPrice * trans.qty)) * 100 / SUM(trans.sellPrice * trans.qty) AS profit_percent_on_revenue,
+        (SUM(trans.sellPrice * trans.qty) - SUM(trans.costPrice * trans.qty)) * 100 / SUM(trans.costPrice * trans.qty) AS profit_percent_on_cost
+      FROM `sandbox-211511.LIDD_Dataset.transactions6Mil` AS trans
+      GROUP BY trans.category
+  ) AS tran_summary ON category_summary.category = tran_summary.category
+ORDER BY category_summary.category
+
+
+*******************
+3)#standardSQL
+
+WITH category_summary AS
+(
+  SELECT 
+    pinfo.accounting_category AS category,
+    COUNT(1) AS product_count
+  FROM `sandbox-211511.LIDD_Dataset.Product_Info` AS pinfo
+  GROUP BY pinfo.accounting_category
+),
+
+tran_summary AS
+(
+  SELECT
+    trans.category,
+    SUM(qty) sold_qty,
+    SUM(trans.sellPrice * trans.qty) AS revenue,
+    SUM(trans.costPrice * trans.qty) AS cost,
+    SUM(trans.sellPrice * trans.qty) - SUM(trans.costPrice * trans.qty) AS profit,
+    (SUM(trans.sellPrice * trans.qty) - SUM(trans.costPrice * trans.qty)) * 100 / SUM(trans.sellPrice * trans.qty) AS profit_percent_on_revenue,
+    (SUM(trans.sellPrice * trans.qty) - SUM(trans.costPrice * trans.qty)) * 100 / SUM(trans.costPrice * trans.qty) AS profit_percent_on_cost
+  FROM `sandbox-211511.LIDD_Dataset.transactions6Mil` AS trans
+  WHERE NOT (trans.costPrice IS NULL OR trans.sellPrice IS NULL OR trans.costPrice = 0 OR trans.sellPrice = 0)
+  GROUP BY trans.category
+)
+
+
+SELECT
+  category_summary.category as category,
+  category_summary.product_count as product_count,
+  IFNULL(tran_summary.sold_qty, 0) AS sold_qty,
+  ROUND(CAST(IFNULL(tran_summary.revenue, 0) AS NUMERIC), 2) AS revenue,
+  ROUND(CAST(IFNULL(tran_summary.cost, 0) AS NUMERIC), 2) AS cost,
+  ROUND(CAST(IFNULL(tran_summary.profit, 0) AS NUMERIC), 2) AS profit,
+  ROUND(CAST(IFNULL(tran_summary.profit_percent_on_revenue, 0) AS NUMERIC), 2) AS profit_percent_on_revenue,
+  ROUND(CAST(IFNULL(tran_summary.profit_percent_on_cost, 0) AS NUMERIC), 2) AS profit_percent_on_cost
+FROM category_summary
+  LEFT JOIN tran_summary ON category_summary.category = tran_summary.category
+ORDER BY category_summary.category 
+
