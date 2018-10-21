@@ -1,4 +1,5 @@
-select orderNum, min(Order_Date) , sum(Item_Count)as Item, sum(case when category = "Additif" then Revenue else 0 end) as Additif_Revenue,
+select orderNum,min(Order_Date) as First_date,sum(Item_Count) as Items_count,
+sum(case when category = "Additif" then Revenue else 0 end) as Additif_Revenue,
 sum(case when category = "Aliment" then Revenue else 0 end) as Aliment_Revenue,
 sum(case when category = "Matériel" then Revenue else 0 end) as Materiel_Revenue,
 sum(case when category = "Formulaire" then Revenue else 0 end) as Formulaire_Revenue,
@@ -18,7 +19,7 @@ sum(case when category = "Equipement" then Profit else 0 end) as Equipement_Prof
 sum(case when category = "Biologique" then Profit else 0 end) as Biologique_Profit from (
 select orderNum, min(dateShipped) as Order_Date, count(itemNum) as Item_Count,
 sum(sellPrice * qty) as Revenue,
-sum(sellPrice * qty)- sum(costPrice * qty) as Profit,
-category from  `sandbox-211511.LIDD_Dataset.transactions6Mil` 
-group by category, orderNum order by orderNum)
-group by orderNum, Order_Date  order by orderNum
+sum(sellPrice * qty) - sum(costPrice * qty) as Profit,
+category from `sandbox-211511.LIDD_Dataset.transactions6Mil` 
+group by category,orderNum order by orderNum)
+group by orderNum order by orderNum
